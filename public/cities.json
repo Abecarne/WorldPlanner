@@ -1,5 +1,37 @@
 [
   {
+    "name": "Honolulu",
+    "country": "United States",
+    "countryCode": "US",
+    "timezone": "Pacific/Honolulu",
+    "flag": "🇺🇸",
+    "aliases": [
+      "Hawaii"
+    ]
+  },
+  {
+    "name": "Papeete",
+    "country": "French Polynesia",
+    "countryCode": "PF",
+    "timezone": "Pacific/Tahiti",
+    "flag": "🇵🇫",
+    "aliases": [
+      "Tahiti"
+    ]
+  },
+  {
+    "name": "Quebec",
+    "country": "Canada",
+    "countryCode": "CA",
+    "timezone": "America/Toronto",
+    "flag": "🇨🇦",
+    "aliases": [
+      "Quebec City",
+      "Quebec",
+      "Quebec-ville"
+    ]
+  },
+  {
     "name": "Kabul",
     "country": "Afghanistan",
     "countryCode": "AF",
@@ -2484,26 +2516,5 @@
     "countryCode": "JP",
     "timezone": "Asia/Tokyo",
     "flag": "🇯🇵"
-  },
-  {
-    "name": "Luoyang",
-    "country": "China",
-    "countryCode": "CN",
-    "timezone": "Asia/Shanghai",
-    "flag": "🇨🇳"
-  },
-  {
-    "name": "Hyderabad",
-    "country": "Pakistan",
-    "countryCode": "PK",
-    "timezone": "Asia/Karachi",
-    "flag": "🇵🇰"
-  },
-  {
-    "name": "The Bronx",
-    "country": "United States",
-    "countryCode": "US",
-    "timezone": "America/New_York",
-    "flag": "🇺🇸"
   }
 ]

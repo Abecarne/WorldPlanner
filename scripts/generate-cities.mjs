@@ -6,6 +6,30 @@ const OUTPUT_PATH = new URL("../public/cities.json", import.meta.url);
 const MIN_POPULATION = 500000;
 const MAX_CITIES = 350;
 
+const EXTRA_CITIES = [
+  {
+    name: "Honolulu",
+    country: "United States",
+    countryCode: "US",
+    timezone: "Pacific/Honolulu",
+    aliases: ["Hawaii"],
+  },
+  {
+    name: "Papeete",
+    country: "French Polynesia",
+    countryCode: "PF",
+    timezone: "Pacific/Tahiti",
+    aliases: ["Tahiti"],
+  },
+  {
+    name: "Quebec",
+    country: "Canada",
+    countryCode: "CA",
+    timezone: "America/Toronto",
+    aliases: ["Quebec City", "Quebec", "Quebec-ville"],
+  },
+];
+
 // List of world capitals with their names and country codes
 const WORLD_CAPITALS = [
   { name: 'Kabul', countryCode: 'AF' },
@@ -309,6 +333,25 @@ const topCities = allTheCities
 
 const deduped = [];
 const seen = new Set();
+
+for (const city of EXTRA_CITIES) {
+  const key = `${city.name.toLowerCase()}|${city.countryCode}`;
+
+  if (seen.has(key)) {
+    continue;
+  }
+
+  deduped.push({
+    name: city.name,
+    country: city.country,
+    countryCode: city.countryCode,
+    timezone: city.timezone,
+    flag: codeToFlag(city.countryCode),
+    ...(city.aliases.length > 0 ? { aliases: city.aliases } : {}),
+  });
+
+  seen.add(key);
+}
 
 // First, add all capitals that exist in the dataset
 for (const capital of WORLD_CAPITALS) {
