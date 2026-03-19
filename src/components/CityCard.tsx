@@ -24,9 +24,14 @@ export function CityCard({ row, isReference, timeFormat }: CityCardProps) {
           <p>{row.city.country}</p>
         </div>
         <div className="card-badges">
-          {isReference ? <span className="reference-pill">Reference</span> : null}
+          {isReference ? (
+            <span className="reference-pill">Reference</span>
+          ) : null}
           {row.dayDifference !== 0 && (
-            <span className="day-badge" title={row.dayDifference > 0 ? "Jour suivant" : "Jour precedent"}>
+            <span
+              className="day-badge"
+              title={row.dayDifference > 0 ? "Jour suivant" : "Jour precedent"}
+            >
               {row.dayDifference > 0 ? "+1 jour" : "-1 jour"}
             </span>
           )}

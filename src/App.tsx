@@ -265,11 +265,11 @@ function App() {
     const lines = [
       `📅 Reunion : ${formatReadableMeeting(referenceDateTime)} (${referenceCity.name})`,
       ...rows.map((row) => {
-        let dayLabel = '';
+        let dayLabel = "";
         if (row.dayDifference > 0) {
-          dayLabel = ' (+1 jour)';
+          dayLabel = " (+1 jour)";
         } else if (row.dayDifference < 0) {
-          dayLabel = ' (-1 jour)';
+          dayLabel = " (-1 jour)";
         }
         return `🌍 ${row.city.name} — ${row.time24} (${row.utcOffsetLabel})${dayLabel}`;
       }),
