@@ -11,6 +11,7 @@
     "generate:cities": "node scripts/generate-cities.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.577.0",
     "luxon": "^3.7.2",

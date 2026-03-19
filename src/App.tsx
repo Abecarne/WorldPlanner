@@ -9,6 +9,7 @@ import { ShareButtons } from "./components/ShareButtons";
 import { TimeSlider } from "./components/TimeSlider";
 import { loadCities, type City } from "./data/cities";
 import { useTimezones } from "./hooks/useTimezones";
+import { trackAcquisitionVisit, trackSelectionSnapshot } from "./lib/analytics";
 import {
   formatReadableMeeting,
   isValidDate,
@@ -118,6 +119,8 @@ function App() {
   const [theme, setTheme] = useState<Theme>(initialUrlState.theme);
 
   const initializedRef = useRef(false);
+  const acquisitionTrackedRef = useRef(false);
+  const selectionTrackedSignatureRef = useRef("");
 
   const citiesById = useMemo(() => {
     return new Map(cities.map((city) => [city.id, city]));
@@ -138,7 +141,37 @@ function App() {
           return;
         }
 
+        const loadedCitiesById = new Map(loadedCities.map((city) => [city.id, city]));
+
+        let nextSelectedIds = initialUrlState.cityIds.filter((id) =>
+          loadedCitiesById.has(id),
+        );
+
+        if (nextSelectedIds.length === 0) {
+          const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const localCity = loadedCities.find(
+            (city) => city.timezone === localTimezone,
+          );
+
+          if (localCity) {
+            nextSelectedIds = [localCity.id];
+          }
+        }
+
+        if (nextSelectedIds.length === 0 && loadedCities.length > 0) {
+          nextSelectedIds = [loadedCities[0].id];
+        }
+
+        const nextReferenceCityId =
+          initialUrlState.referenceCityId &&
+          nextSelectedIds.includes(initialUrlState.referenceCityId)
+            ? initialUrlState.referenceCityId
+            : (nextSelectedIds[0] ?? null);
+
         setCities(loadedCities);
+        setSelectedCityIds(nextSelectedIds);
+        setReferenceCityId(nextReferenceCityId);
+        initializedRef.current = true;
         setLoading(false);
       })
       .catch(() => {
@@ -153,56 +186,51 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  useEffect(() => {
-    if (cities.length === 0 || initializedRef.current) {
-      return;
-    }
-
-    initializedRef.current = true;
-
-    let nextSelectedIds = initialUrlState.cityIds.filter((id) =>
-      citiesById.has(id),
-    );
-
-    if (nextSelectedIds.length === 0) {
-      const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const localCity = cities.find((city) => city.timezone === localTimezone);
-      if (localCity) {
-        nextSelectedIds = [localCity.id];
-      }
-    }
-
-    if (nextSelectedIds.length === 0 && cities.length > 0) {
-      nextSelectedIds = [cities[0].id];
-    }
-
-    setSelectedCityIds(nextSelectedIds);
-
-    if (
-      initialUrlState.referenceCityId &&
-      nextSelectedIds.includes(initialUrlState.referenceCityId)
-    ) {
-      setReferenceCityId(initialUrlState.referenceCityId);
-    } else {
-      setReferenceCityId(nextSelectedIds[0] ?? null);
-    }
-  }, [
-    cities,
-    citiesById,
-    initialUrlState.cityIds,
-    initialUrlState.referenceCityId,
-  ]);
+  }, [initialUrlState.cityIds, initialUrlState.referenceCityId]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
+  useEffect(() => {
+    if (acquisitionTrackedRef.current) {
+      return;
+    }
+
+    acquisitionTrackedRef.current = true;
+    trackAcquisitionVisit();
+  }, []);
+
   const effectiveReferenceCityId =
     referenceCityId && selectedCityIds.includes(referenceCityId)
       ? referenceCityId
       : (selectedCityIds[0] ?? null);
+
+  const referenceCityForTracking = useMemo(() => {
+    return (
+      selectedCities.find((city) => city.id === effectiveReferenceCityId) ?? null
+    );
+  }, [effectiveReferenceCityId, selectedCities]);
+
+  useEffect(() => {
+    if (!initializedRef.current || selectedCities.length === 0) {
+      return;
+    }
+
+    const signature = `${selectedCityIds.join(",")}|${effectiveReferenceCityId ?? "none"}`;
+
+    if (selectionTrackedSignatureRef.current === signature) {
+      return;
+    }
+
+    selectionTrackedSignatureRef.current = signature;
+    trackSelectionSnapshot(selectedCities, referenceCityForTracking);
+  }, [
+    effectiveReferenceCityId,
+    referenceCityForTracking,
+    selectedCities,
+    selectedCityIds,
+  ]);
 
   const { referenceCity, referenceDateTime, rows } = useTimezones({
     selectedCities,
