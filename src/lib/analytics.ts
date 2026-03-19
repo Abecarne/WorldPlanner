@@ -70,8 +70,12 @@ export function trackSelectionSnapshot(
     return;
   }
 
-  const countryCodes = [...new Set(selectedCities.map((city) => city.countryCode))].sort();
-  const countryNames = [...new Set(selectedCities.map((city) => city.country))].sort();
+  const countryCodes = [
+    ...new Set(selectedCities.map((city) => city.countryCode)),
+  ].sort();
+  const countryNames = [
+    ...new Set(selectedCities.map((city) => city.country)),
+  ].sort();
   const cityNames = selectedCities.map((city) => city.name);
 
   track("planner_selection_updated", {

@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run generate:seo",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:cities": "node scripts/generate-cities.mjs"
+    "generate:cities": "node scripts/generate-cities.mjs",
+    "generate:seo": "node scripts/generate-seo.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

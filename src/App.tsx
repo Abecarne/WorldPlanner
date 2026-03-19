@@ -10,6 +10,7 @@ import { TimeSlider } from "./components/TimeSlider";
 import { loadCities, type City } from "./data/cities";
 import { useTimezones } from "./hooks/useTimezones";
 import { trackAcquisitionVisit, trackSelectionSnapshot } from "./lib/analytics";
+import { applySeoMetadata } from "./lib/seo";
 import {
   formatReadableMeeting,
   isValidDate,
@@ -141,14 +142,17 @@ function App() {
           return;
         }
 
-        const loadedCitiesById = new Map(loadedCities.map((city) => [city.id, city]));
+        const loadedCitiesById = new Map(
+          loadedCities.map((city) => [city.id, city]),
+        );
 
         let nextSelectedIds = initialUrlState.cityIds.filter((id) =>
           loadedCitiesById.has(id),
         );
 
         if (nextSelectedIds.length === 0) {
-          const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const localTimezone =
+            Intl.DateTimeFormat().resolvedOptions().timeZone;
           const localCity = loadedCities.find(
             (city) => city.timezone === localTimezone,
           );
@@ -208,7 +212,8 @@ function App() {
 
   const referenceCityForTracking = useMemo(() => {
     return (
-      selectedCities.find((city) => city.id === effectiveReferenceCityId) ?? null
+      selectedCities.find((city) => city.id === effectiveReferenceCityId) ??
+      null
     );
   }, [effectiveReferenceCityId, selectedCities]);
 
@@ -305,6 +310,40 @@ function App() {
 
     return lines.join("\n");
   }, [referenceCity, referenceDateTime, rows]);
+
+  const seoTitle = useMemo(() => {
+    if (selectedCities.length === 0) {
+      return "WorldPlanner | Planifier une reunion internationale et fuseaux horaires";
+    }
+
+    const highlightedCities = selectedCities
+      .slice(0, 3)
+      .map((city) => city.name)
+      .join(", ");
+
+    return `WorldPlanner | Convertisseur de fuseaux horaires: ${highlightedCities}`;
+  }, [selectedCities]);
+
+  const seoDescription = useMemo(() => {
+    if (!referenceDateTime || !referenceCity || selectedCities.length === 0) {
+      return "WorldPlanner aide les equipes internationales a comparer les fuseaux horaires, trouver le meilleur creneau et partager un resume de reunion en un clic.";
+    }
+
+    const meetingLabel = referenceDateTime.setLocale("fr").toFormat("dd LLL yyyy 'a' HH:mm");
+    const cityList = selectedCities
+      .slice(0, 5)
+      .map((city) => city.name)
+      .join(", ");
+
+    return `Reunion internationale le ${meetingLabel} (${referenceCity.name}) avec ${cityList}. Comparez instantanement horaires locaux, decalages UTC et differences de jour.`;
+  }, [referenceCity, referenceDateTime, selectedCities]);
+
+  useEffect(() => {
+    applySeoMetadata({
+      title: seoTitle,
+      description: seoDescription,
+    });
+  }, [seoDescription, seoTitle]);
 
   const addCity = (city: City) => {
     setSelectedCityIds((previous) => {
@@ -454,6 +493,20 @@ function App() {
       </p>
 
       <ShareButtons shareUrl={shareUrl} summary={markdownSummary} />
+
+      <section className="panel seo-content" aria-labelledby="seo-content-title">
+        <h2 id="seo-content-title">Planificateur de reunion internationale</h2>
+        <p>
+          WorldPlanner est un convertisseur de fuseaux horaires concu pour les equipes
+          distribuees. Vous pouvez comparer rapidement les horaires entre Paris, Quebec,
+          Papeete, Tokyo, New York et plus de 300 villes.
+        </p>
+        <p>
+          L outil calcule automatiquement les decalages UTC, les changements de jour
+          (+1 jour / -1 jour) et met en avant les creneaux de travail les plus confortables.
+          Vous pouvez ensuite partager un lien ou un resume markdown avec votre equipe.
+        </p>
+      </section>
     </div>
   );
 }
