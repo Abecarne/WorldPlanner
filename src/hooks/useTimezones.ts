@@ -15,8 +15,7 @@ export interface CityMeetingInfo {
   utcOffsetLabel: string;
   differenceLabel: string;
   differenceMinutes: number;
-  workWindow: "green" | "yellow" | "red";
-}
+  workWindow: "green" | "yellow" | "red";  dayDifference: -1 | 0 | 1;}
 
 interface UseTimezonesInput {
   selectedCities: City[];
@@ -69,15 +68,20 @@ export function useTimezones({
         const differenceMinutes =
           localDateTime.offset - referenceDateTime.offset;
 
+        const referenceDayOfYear = referenceDateTime.ordinal;
+        const localDayOfYear = localDateTime.ordinal;
+        const dayDifference = (localDayOfYear - referenceDayOfYear) as -1 | 0 | 1;
+
         return {
           city,
           localDateTime,
-          time24: localDateTime.toFormat("HH:mm"),
-          time12: localDateTime.toFormat("hh:mm a"),
+          time24: localDateTime.toFormat('HH:mm'),
+          time12: localDateTime.toFormat('hh:mm a'),
           utcOffsetLabel: formatUtcOffset(localDateTime.offset),
           differenceLabel: formatDifference(differenceMinutes),
           differenceMinutes,
           workWindow: getWorkWindow(localDateTime),
+          dayDifference: dayDifference > 1 ? 1 : dayDifference < -1 ? -1 : dayDifference,
         };
       })
       .sort((first, second) => {
